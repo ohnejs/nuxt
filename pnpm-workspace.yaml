@@ -1,0 +1,10 @@
+packages:
+  - tests/fixture
+  - tests/floor
+
+allowBuilds:
+  esbuild: true
+
+minimumReleaseAgeExclude:
+  - '@ohnejs/client'
+  - '@ohnejs/cms'

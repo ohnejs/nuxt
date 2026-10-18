@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "allowJs": true,
+    "checkJs": true,
+    "lib": ["esnext", "dom"],
+    "types": ["node"],
+    "strict": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["module.js", "runtime/*.d.ts", "tests/*.ts"]
+}

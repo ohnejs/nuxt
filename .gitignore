@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Local link to the ohne checkout
+.pnpmfile.cjs
+
+# Nuxt
+.nuxt/
+.output/
+.data/
+
+# Test browser profile
+tests/.chrome/
+
+# Test types app
+tests/.stale/
+
+# OS
+.DS_Store
+
+# Claude
+.claude/

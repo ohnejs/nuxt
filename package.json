@@ -1,0 +1,53 @@
+{
+  "name": "@ohnejs/nuxt",
+  "version": "0.0.1",
+  "description": "Renders the pages of an ohne CMS in Nuxt: redirects, 404s, the head and the live preview.",
+  "homepage": "https://ohne.dev/docs/cms/frameworks#nuxt",
+  "license": "MIT",
+  "author": "Muris Ceman <muris@ohne.dev>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ohnejs/nuxt.git"
+  },
+  "files": [
+    "module.js",
+    "module.d.ts",
+    "runtime"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./module.d.ts",
+      "default": "./module.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "format": "oxfmt",
+    "lint": "oxlint",
+    "test": "node --test --test-concurrency=1 \"tests/*.test.ts\"",
+    "typecheck": "tsc && pnpm --dir tests/fixture exec nuxt typecheck && pnpm --dir tests/fixture exec vue-tsc -b tsconfig.runtime.json && pnpm --dir tests/floor exec nuxt typecheck"
+  },
+  "devDependencies": {
+    "@ohnejs/client": "0.2.0",
+    "@ohnejs/cms": "0.1.0",
+    "@types/node": "26.0.0",
+    "nuxt": "4.6.2",
+    "oxfmt": "0.55.0",
+    "oxlint": "1.70.0",
+    "typescript": "7.0.2",
+    "vue": "3.5.44"
+  },
+  "peerDependencies": {
+    "@ohnejs/client": ">=0.2.0 <0.3.0-0",
+    "nuxt": ">=4.5.0 <5.0.0-0",
+    "vue": ">=3.5.39 <4.0.0-0"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "packageManager": "pnpm@11.5.1"
+}
