@@ -156,7 +156,7 @@ The token stays for the whole visit, even after the editor's script drops it fro
 
 ## Sitemap and robots
 
-The site serves `/sitemap.xml` and `/robots.txt` from the cms. To serve your own `robots.txt`, put it in `public/`. A file there wins.
+The site serves `/sitemap.xml` and `/robots.txt` from the cms. A `robots.txt` in `public/` wins, so delete the one Nuxt's starter ships, or keep your own there.
 
 ## Production
 
