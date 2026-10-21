@@ -27,7 +27,7 @@ The module types every page from the `ohne.ts` file the cms writes next to `nuxt
 
 ## The page
 
-One catch-all page renders every path the cms answers:
+One catch-all page renders every path the cms answers. An `app/app.vue` hides it unless it renders `<NuxtPage />`, so delete the one Nuxt's starter ships:
 
 ```vue
 <!-- app/pages/[...slug].vue -->
@@ -170,7 +170,7 @@ When that address is private, set `API_URL` on the cms to the API's public URL. 
 
 ## TypeScript
 
-`nuxt typecheck` runs `vue-tsc`, which needs TypeScript 6. Keep `typescript` at 6 in your Nuxt app, even if the rest of your workspace uses 7.
+`nuxt typecheck` runs `vue-tsc`, which needs TypeScript 6. Install both with `pnpm add -D typescript@6 vue-tsc`, and keep `typescript` at 6 in your Nuxt app, even if the rest of your workspace uses 7.
 
 A types file from another version of `@ohnejs/client` leaves your pages untyped. `nuxt typecheck` names it, like `` `ohne.ts` was written for another version of `@ohnejs/client` ``. Have the cms that matches your client write it again.
 
