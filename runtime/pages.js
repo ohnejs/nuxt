@@ -15,6 +15,9 @@ import { useState } from '#imports';
  */
 export const PROXY = '/_ohne';
 
+/** @type {string | undefined} */
+let replaced;
+
 /**
  * Each resolved page by the address it answers, as the `ohne` middleware writes it.
  *
@@ -57,7 +60,33 @@ export function addressOf(route) {
  * @param {string | URL} url
  */
 export function keepQuery(router, to, url) {
-  const raw = router.resolve(to.path + new URL(url, 'http://site').search + to.hash);
+  const { pathname, search } = new URL(url, 'http://site');
+  const raw = router.resolve(pathname + search + to.hash);
   if (raw.fullPath === to.fullPath || router.resolve({ ...raw }).fullPath !== to.fullPath) return;
   Object.assign(to, { fullPath: raw.fullPath, href: raw.href });
+}
+
+/**
+ * Keeps the string each `router.replace` is given for the guard pass of its navigation.
+ * The router parses it into an object before any guard runs, which decodes `%2C`.
+ *
+ * @param {Router} router
+ */
+export function watchReplace(router) {
+  const replace = router.replace;
+  router.replace = (to) => {
+    replaced = typeof to === 'string' ? to : undefined;
+    return replace(to).finally(() => {
+      if (replaced === to) replaced = undefined;
+    });
+  };
+}
+
+/**
+ * The string the last `router.replace` was given, if no guard has taken it yet.
+ */
+export function takeReplaced() {
+  const to = replaced;
+  replaced = undefined;
+  return to;
 }

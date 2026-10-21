@@ -6,7 +6,7 @@ import { connect } from '@ohnejs/client';
 import { computed, defineNuxtPlugin, useHead, useResponseHeader, useRouter } from '#imports';
 
 import { useOhne, useOhnePage, useOhneToken } from './composables.js';
-import { addressOf, PROXY, usePages } from './pages.js';
+import { addressOf, PROXY, usePages, watchReplace } from './pages.js';
 
 export default defineNuxtPlugin({
   name: 'ohne',
@@ -24,6 +24,7 @@ export default defineNuxtPlugin({
     if (import.meta.client) {
       const pages = usePages();
       const router = useRouter();
+      watchReplace(router);
       // The page being left still renders until the next one resolves, so it keeps its entry.
       router.afterEach((to, from) => {
         const kept = new Set([addressOf(to), addressOf(from)]);

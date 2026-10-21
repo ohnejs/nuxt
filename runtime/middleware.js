@@ -12,7 +12,7 @@ import {
 } from '#imports';
 
 import { useOhne, useOhneToken } from './composables.js';
-import { addressOf, keepQuery, usePages } from './pages.js';
+import { addressOf, keepQuery, takeReplaced, usePages } from './pages.js';
 
 /**
  * The target of each client redirect, by the navigation it redirected.
@@ -25,10 +25,13 @@ const redirects = new WeakMap();
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const nuxtApp = useNuxtApp();
   const pages = usePages();
+  const replaced = takeReplaced();
   const asked =
     import.meta.server || nuxtApp.isHydrating
       ? useRequestURL()
-      : to.redirectedFrom && redirects.get(to.redirectedFrom);
+      : to.redirectedFrom
+        ? redirects.get(to.redirectedFrom)
+        : replaced;
   if (asked) keepQuery(useRouter(), to, asked);
   const address = addressOf(to);
   // Hydration finds the page the server resolved, and a hash change keeps the page it has.

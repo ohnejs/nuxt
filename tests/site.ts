@@ -327,6 +327,9 @@ export function suite(app: string) {
   });
 
   test('a later redirect by another guard keeps its own query', async () => {
+    const { response, hits } = await get('/onward?tags=[a%2Cb]');
+    assert.equal(response.headers.get('location'), '/about?tags=[a,b]');
+    assert.deepEqual(hits, ['/about?tags=[a,b]']);
     await open('/about');
     api.hits.length = 0;
     await browser.evaluate(`${nuxt}.$router.push('/tocontact?tags=[a%2Cb]')`);
@@ -336,6 +339,33 @@ export function suite(app: string) {
     assert.deepEqual(
       api.hits.map((hit) => hit.path),
       ['/tocontact?tags=[a%2Cb]', '/about?tags=[a,b]'],
+    );
+  });
+
+  test('a replace keeps the bytes of its query, through a redirect too', async () => {
+    await open('/contact');
+    api.hits.length = 0;
+    await browser.evaluate(`document.querySelector('a.replace').click()`);
+    await browser.until(`${text('h1')} === 'team'`);
+    await browser.evaluate(`${nuxt}.$router.replace('/old?tags=[c%2Cd]')`);
+    await browser.until(`location.search === '?tags=[c%2Cd]' && ${text('h1')} === 'about'`);
+    assert.deepEqual(
+      api.hits.map((hit) => hit.path),
+      ['/team?tags=[a%2Cb,new]', '/old?tags=[c%2Cd]', '/about?tags=[c%2Cd]'],
+    );
+  });
+
+  test('a navigation that overtakes a replace keeps its own query', async () => {
+    await open('/contact');
+    api.hits.length = 0;
+    await browser.evaluate(`void ${nuxt}.$router.replace('/slow?tags=[x%2Cy]').catch(() => {})`);
+    await sleep(200);
+    await browser.evaluate(`${nuxt}.$router.push('/slow?tags=[x,y]')`);
+    await browser.until(`${text('h1')} === 'slow'`);
+    assert.equal(await browser.evaluate('location.search'), '?tags=[x,y]');
+    assert.deepEqual(
+      api.hits.map((hit) => hit.path),
+      ['/slow?tags=[x%2Cy]', '/slow?tags=[x,y]'],
     );
   });
 
