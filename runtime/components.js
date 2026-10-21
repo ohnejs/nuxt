@@ -21,6 +21,7 @@ const NEW_TAB = { target: '_blank', rel: 'noopener noreferrer' };
 
 export const OhneBlocks = defineComponent({
   name: 'OhneBlocks',
+  inheritAttrs: false,
   props: {
     blocks: {
       type: /** @type {PropType<readonly Block[] | null>} */ (Array),

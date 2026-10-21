@@ -5,6 +5,7 @@ import type { DefineComponent } from 'vue';
  * Renders each block with the component Nuxt names `Blocks` plus the block's name, like `BlocksHero`.
  * Each block component takes the block's `fields` as its one prop.
  * Its root element carries `data-ohne-block`.
+ * `OhneBlocks` renders no element of its own, so an attribute on it reaches nothing.
  * A block without a component renders nothing, and `nuxt typecheck` names it.
  *
  * @example

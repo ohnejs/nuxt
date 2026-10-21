@@ -16,6 +16,17 @@ const run = promisify(execFile);
 const PREVIEW = new URL('../node_modules/@ohnejs/cms/preview/browser.js', import.meta.url);
 
 /**
+ * A port on `127.0.0.1` that nothing listens on.
+ */
+export async function freePort() {
+  const probe = createNetServer().listen(0, '127.0.0.1');
+  await once(probe, 'listening');
+  const { port } = probe.address() as AddressInfo;
+  probe.close();
+  return port;
+}
+
+/**
  * Builds the Nuxt app in `tests/<app>/` and serves it against a stand-in API.
  * It then runs every server and browser test.
  * The app's config names a dead API, so each passing test also proves that `NUXT_OHNE_API` replaces it.
@@ -52,10 +63,7 @@ export function suite(app: string) {
     delete env.NUXT_OHNE_API;
     await run('pnpm', ['exec', 'nuxt', 'build'], { cwd: dir, env });
     // Nitro reads `PORT=0` as unset and takes its default, so the free port is found here.
-    const probe = createNetServer().listen(0, '127.0.0.1');
-    await once(probe, 'listening');
-    const { port } = probe.address() as AddressInfo;
-    probe.close();
+    const port = await freePort();
     origin = `http://127.0.0.1:${port}`;
     site = spawn('node', ['.output/server/index.mjs'], {
       cwd: dir,
