@@ -296,6 +296,49 @@ export function suite(app: string) {
     await browser.until(`${text('.error')} === 'error:502'`);
   });
 
+  const escaped = '?tags=[a%2Cb,new]&e=%3D&c=%3A&t=%60x%60&s=%20b';
+
+  test('a query reaches the cms and a redirect with the bytes the request sent', async () => {
+    const { response, hits } = await get(`/old${escaped}`);
+    assert.equal(response.status, 301);
+    assert.equal(response.headers.get('location'), `/about${escaped}`);
+    assert.deepEqual(hits, [`/old${escaped}`]);
+    assert.deepEqual((await get(`/about${escaped}`)).hits, [`/about${escaped}`]);
+  });
+
+  test('an escaped query hydrates on the server key, and keeps its bytes on the client', async () => {
+    api.hits.length = 0;
+    await browser.goto(`${origin}/about${escaped}`);
+    await browser.until(`${nuxt} && !${nuxt}.isHydrating && ${text('h1')} === 'about'`);
+    assert.deepEqual(api.hits, [{ path: `/about${escaped}`, token: undefined }]);
+    assert.equal(await browser.evaluate('location.search'), escaped);
+    api.hits.length = 0;
+    await browser.evaluate(`${nuxt}.$router.push('/team?q=%5Bz%2Cw%5D')`);
+    await browser.until(`${text('h1')} === 'team'`);
+    await browser.evaluate(`${nuxt}.$router.push('/team?q=%5Bz%2Cw%5D#top')`);
+    await browser.until(`location.hash === '#top'`);
+    await browser.evaluate(`${nuxt}.$router.push('/old?tags=[a%2Cb]')`);
+    await browser.until(`${text('h1')} === 'about'`);
+    assert.equal(await browser.evaluate('location.search'), '?tags=[a%2Cb]');
+    assert.deepEqual(
+      api.hits.map((hit) => hit.path),
+      ['/team?q=%5Bz%2Cw%5D', '/old?tags=[a%2Cb]', '/about?tags=[a%2Cb]'],
+    );
+  });
+
+  test('a later redirect by another guard keeps its own query', async () => {
+    await open('/about');
+    api.hits.length = 0;
+    await browser.evaluate(`${nuxt}.$router.push('/tocontact?tags=[a%2Cb]')`);
+    await browser.until(`${text('h1')} === 'contact'`);
+    await browser.evaluate(`${nuxt}.$router.push('/onward?tags=[a,b]')`);
+    await browser.until(`${text('h1')} === 'about'`);
+    assert.deepEqual(
+      api.hits.map((hit) => hit.path),
+      ['/tocontact?tags=[a%2Cb]', '/about?tags=[a,b]'],
+    );
+  });
+
   test('hydration matches the server', () => {
     assert.deepEqual(
       browser.logs.filter((line) => /hydrat|mismatch/i.test(line)),

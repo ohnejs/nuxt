@@ -88,6 +88,8 @@ export async function startAPI(preview: string) {
     const json = (value: object) =>
       send(200, 'application/json', JSON.stringify(value), token ? privately : {});
     if (pathname === '/old') return json({ kind: 'redirect', to: `/about${search}`, code: 301 });
+    if (pathname === '/tocontact')
+      return json({ kind: 'redirect', to: `/contact${search}`, code: 302 });
     if (pathname === '/away')
       return json({ kind: 'redirect', to: 'https://example.com/x', code: 302 });
     if (pathname === '/missing')

@@ -1,5 +1,6 @@
 /** @import { Resolved, ResolvedRedirect } from '@ohnejs/client' */
 /** @import { RegisteredCMS } from '../module.js' */
+/** @import { RouteLocationNormalized, Router } from '#vue-router' */
 
 import { useState } from '#imports';
 
@@ -38,4 +39,25 @@ export function usePages() {
  */
 export function addressOf(route) {
   return route.fullPath.replace(/#.*/, '');
+}
+
+/**
+ * Gives `to` back the query bytes of `url` when it is the same route with its query rebuilt.
+ * The router rebuilds Nuxt's first route and a guard's redirect from their parsed query, which decodes `%2C`.
+ * With the bytes back, the address, the history entry and every later `fullPath` agree on server and client.
+ *
+ * @example
+ * ```ts
+ * keepQuery(router, to, '/old?tags=[a%2Cb]') // to.fullPath was '/old?tags=[a,b]'
+ * to.fullPath                                // -> '/old?tags=[a%2Cb]'
+ * ```
+ *
+ * @param {Router} router
+ * @param {RouteLocationNormalized & { href?: string }} to
+ * @param {string | URL} url
+ */
+export function keepQuery(router, to, url) {
+  const raw = router.resolve(to.path + new URL(url, 'http://site').search + to.hash);
+  if (raw.fullPath === to.fullPath || router.resolve({ ...raw }).fullPath !== to.fullPath) return;
+  Object.assign(to, { fullPath: raw.fullPath, href: raw.href });
 }

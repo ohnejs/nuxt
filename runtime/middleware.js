@@ -7,14 +7,29 @@ import {
   setResponseStatus,
   useNuxtApp,
   useRequestEvent,
+  useRequestURL,
+  useRouter,
 } from '#imports';
 
 import { useOhne, useOhneToken } from './composables.js';
-import { addressOf, usePages } from './pages.js';
+import { addressOf, keepQuery, usePages } from './pages.js';
+
+/**
+ * The target of each client redirect, by the navigation it redirected.
+ * Every hop of a redirect chain names that navigation in `redirectedFrom`.
+ *
+ * @type {WeakMap<object, string>}
+ */
+const redirects = new WeakMap();
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const nuxtApp = useNuxtApp();
   const pages = usePages();
+  const asked =
+    import.meta.server || nuxtApp.isHydrating
+      ? useRequestURL()
+      : to.redirectedFrom && redirects.get(to.redirectedFrom);
+  if (asked) keepQuery(useRouter(), to, asked);
   const address = addressOf(to);
   // Hydration finds the page the server resolved, and a hash change keeps the page it has.
   const kept = nuxtApp.isHydrating || addressOf(from) === address;
@@ -43,6 +58,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   if (page.kind === 'redirect') {
     // The server answers the redirect itself, so it never resolves the target too.
     const external = import.meta.server || !/^\/(?![/\\])/.test(page.to);
+    // The router rebuilds a guard's redirect from its parsed query, so the target's pass restores it.
+    if (!external) redirects.set(to.redirectedFrom ?? to, page.to);
     return nuxtApp.runWithContext(() => navigateTo(page.to, { redirectCode: page.code, external }));
   }
   pages.value[address] = page;
