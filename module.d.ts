@@ -21,6 +21,29 @@ export interface ModuleOptions {
    * 'ohne.ts'
    */
   types?: string;
+
+  /**
+   * The cookie that binds a visitor to a sandbox copy of the API, set only for a live demo.
+   * The server relays that one cookie to the API, so a page shows the visitor's copy.
+   * Every page then answers `noindex`, and a page read with the cookie is never cached.
+   * The server refuses to start with a cached route rule, which would share one visitor's copy.
+   * `NUXT_OHNE_SANDBOX` replaces it when the server starts.
+   * Never set it on a real site.
+   *
+   * @default
+   * ''
+   */
+  sandbox?: string;
+
+  /**
+   * Headers a form's `create` may pass through the site to the API, like a spam check's `recaptcha-token`.
+   * Every other header the visitor sends stays on the site, cookies and `authorization` among them.
+   * The module refuses a credential, `host`, `origin` and each `x-forwarded-` header.
+   *
+   * @default
+   * []
+   */
+  headers?: string[];
 }
 
 /**

@@ -2,12 +2,18 @@
   "extends": "./.nuxt/tsconfig.server.json",
   "compilerOptions": {
     "checkJs": true,
-    // Composite, so the app check reads `server.js` through its declarations instead of as app code.
+    // Composite, so the app check reads the server's files through their declarations instead of as app code.
     "composite": true,
     "noEmit": false,
     "emitDeclarationOnly": true,
     "rootDir": "../..",
     "outDir": "./.nuxt/runtime"
   },
-  "include": ["./.nuxt/types/nitro.d.ts", "../../runtime/server.js"]
+  "include": [
+    "./.nuxt/types/nitro.d.ts",
+    "../../runtime/server.js",
+    "../../runtime/nitro.js",
+    "../../runtime/sandbox.js",
+    "../../runtime/error.js"
+  ]
 }

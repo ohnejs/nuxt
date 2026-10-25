@@ -2,6 +2,11 @@
   "extends": "./.nuxt/tsconfig.app.json",
   "compilerOptions": { "checkJs": true, "tsBuildInfoFile": "./.nuxt/runtime/app.tsbuildinfo" },
   "include": ["./.nuxt/nuxt.d.ts", "../../runtime/*.js"],
-  "exclude": ["../../runtime/server.js"],
+  "exclude": [
+    "../../runtime/server.js",
+    "../../runtime/nitro.js",
+    "../../runtime/sandbox.js",
+    "../../runtime/error.js"
+  ],
   "references": [{ "path": "./tsconfig.runtime.server.json" }]
 }

@@ -138,6 +138,81 @@ const { data: footer } = await useAsyncData('footer', () => ohne.resolve('/foote
 </template>
 ```
 
+## Site data
+
+`useOhneRead` and `useOhneList` read records anywhere, a layout among them, on the server and again in the browser as the visitor moves on:
+
+```vue
+<!-- app/pages/blog.vue -->
+<script setup lang="ts">
+const route = useRoute();
+const settings = await useOhneRead('Settings');
+const posts = await useOhneList('Posts', () => ({ page: Number(route.query.page) || 1 }));
+</script>
+
+<template>
+  <main>
+    <p v-for="post in posts.records" :key="post.UUID">{{ post.title }}</p>
+    <NuxtLink v-if="posts.page < posts.lastPage" :to="{ query: { page: posts.page + 1 } }">Older</NuxtLink>
+    <footer>{{ settings.copyright }}</footer>
+  </main>
+</template>
+```
+
+- A collection that holds one record, like `Settings`, reads without a `UUID`. Any other reads one record by its `UUID`, as `useOhneRead('Posts', uuid)`, and the ref holds `undefined` when a visitor may not see it.
+- Records read in the current page's locale unless you pass `locale`.
+- A failed read shows the error page with a `502`, as a failed page does. So the ref always holds the record.
+- Options passed as a getter read again when they change, like the page number above.
+
+The [guide](https://ohne.dev/docs/cms/frameworks#nuxt) shows a layout that reads the site's menu.
+
+## Forms
+
+A contact form stores a record through `useOhne().create`, for a collection whose create your API opens to visitors. The browser posts to the site, and the site passes the create on to your API:
+
+```vue
+<!-- app/components/ContactForm.vue -->
+<script setup lang="ts">
+const ohne = useOhne();
+const sent = ref(false);
+const errors = ref<Partial<Record<string, string>>>({});
+
+async function send(event: Event) {
+  const form = new FormData(event.target as HTMLFormElement);
+  const result = await ohne.create('Messages', {
+    email: String(form.get('email')),
+    message: String(form.get('message')),
+  });
+  if (result.ok) sent.value = true;
+  else errors.value = result.errors;
+}
+</script>
+
+<template>
+  <p v-if="sent">Thanks!</p>
+  <form v-else @submit.prevent="send">
+    <input name="email" type="email" />
+    <p v-if="errors.email">{{ errors.email }}</p>
+    <textarea name="message" />
+    <button>Send</button>
+  </form>
+</template>
+```
+
+A refusal the visitor can fix, like an invalid email, resolves with the API's `message` and a message per field in `errors`. Any other failure throws.
+
+The site passes on only the create's body, its language and the visitor's address. A spam check that reads a header, like a `recaptcha-token`, needs that header named in `ohne.headers`:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['@ohnejs/nuxt'],
+  ohne: { api: 'http://localhost:9001', headers: ['recaptcha-token'] },
+});
+```
+
+Then pass it with the create: `ohne.create('Messages', input, { headers: { 'recaptcha-token': token } })`. For each visitor to get their own rate limit, list your site's server in `api.trustProxy` on the API. The [guide](https://ohne.dev/docs/cms/website#forms) shows the collection and the spam check.
+
 ## The head
 
 The module fills the `<head>` from the page: the title, description, share tags, `robots`, the canonical link, a link per translation, and `<html lang>`. These are the tags the cms's own `renderHead` writes.

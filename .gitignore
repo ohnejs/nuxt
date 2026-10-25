@@ -12,8 +12,9 @@ node_modules/
 # Test browser profile
 tests/.chrome/
 
-# Test types app
+# Test apps
 tests/.stale/
+tests/.headers/
 
 # OS
 .DS_Store

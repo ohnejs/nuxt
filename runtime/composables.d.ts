@@ -1,5 +1,16 @@
-import type { Ohne, Resolved, ResolvedRedirect } from '@ohnejs/client';
-import type { ComputedRef, Ref } from 'vue';
+import type {
+  CollectionOf,
+  ListOptions,
+  Ohne,
+  Picked,
+  ReadOptions,
+  RecordOf,
+  RecordPage,
+  Resolved,
+  ResolvedRedirect,
+  SingletonOf,
+} from '@ohnejs/client';
+import type { ComputedRef, MaybeRefOrGetter, Ref } from 'vue';
 
 import type { RegisteredCMS } from '../module.js';
 
@@ -41,3 +52,63 @@ export function useOhnePage(): ComputedRef<
  * ```
  */
 export function useOhneToken(): Readonly<Ref<string | undefined>>;
+
+/**
+ * Reads a singleton's record, like the site's `Settings`, for this page and its hydration.
+ * The ref always holds the record: a failed read shows the error page with a `502`, as a failed page does.
+ * The locale defaults to the current page's, and getter options read again when they change.
+ *
+ * @example
+ * ```ts
+ * const settings = await useOhneRead('Settings')
+ *
+ * settings.value.copyright // -> 'Acme'
+ * ```
+ */
+export function useOhneRead<
+  C extends SingletonOf<RegisteredCMS>,
+  K extends keyof RecordOf<RegisteredCMS, C> & string = keyof RecordOf<RegisteredCMS, C> & string,
+>(
+  collection: C,
+  options?: MaybeRefOrGetter<ReadOptions<RegisteredCMS, K>>,
+): Promise<Readonly<Ref<Picked<RecordOf<RegisteredCMS, C>, K>>>>;
+
+/**
+ * Reads one record by its `UUID`; the ref holds `undefined` when a visitor may not see it.
+ * A getter `uuid` reads again when it changes.
+ *
+ * @example
+ * ```ts
+ * const author = await useOhneRead('Authors', () => String(route.params.id))
+ *
+ * author.value?.name // -> 'Ada'
+ * ```
+ */
+export function useOhneRead<
+  C extends CollectionOf<RegisteredCMS>,
+  K extends keyof RecordOf<RegisteredCMS, C> & string = keyof RecordOf<RegisteredCMS, C> & string,
+>(
+  collection: C,
+  uuid: MaybeRefOrGetter<string>,
+  options?: MaybeRefOrGetter<ReadOptions<RegisteredCMS, K>>,
+): Promise<Readonly<Ref<Picked<RecordOf<RegisteredCMS, C>, K> | undefined>>>;
+
+/**
+ * Reads one page of a collection's records, with what a pager needs.
+ * Getter options read again when they change, like a page number from `?page=2`.
+ *
+ * @example
+ * ```ts
+ * const posts = await useOhneList('Posts', () => ({ order: ['-publishedAt'], page: page.value }))
+ *
+ * posts.value.records  // -> [{ UUID: '...', path: '/blog/hello', title: 'Hello', ... }]
+ * posts.value.lastPage // -> 3
+ * ```
+ */
+export function useOhneList<
+  C extends CollectionOf<RegisteredCMS>,
+  K extends keyof RecordOf<RegisteredCMS, C> & string = keyof RecordOf<RegisteredCMS, C> & string,
+>(
+  collection: C,
+  options?: MaybeRefOrGetter<ListOptions<RegisteredCMS, RecordOf<RegisteredCMS, C>, K>>,
+): Promise<Readonly<Ref<RecordPage<Picked<RecordOf<RegisteredCMS, C>, K>>>>>;

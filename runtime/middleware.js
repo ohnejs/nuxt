@@ -12,7 +12,7 @@ import {
 } from '#imports';
 
 import { useOhne, useOhneToken } from './composables.js';
-import { addressOf, keepQuery, takeReplaced, usePages } from './pages.js';
+import { addressOf, apiError, keepQuery, takeReplaced, usePages } from './pages.js';
 
 /**
  * The target of each client redirect, by the navigation it redirected.
@@ -50,12 +50,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   try {
     page = await useOhne().resolve(address, { token });
   } catch (cause) {
-    throw createError({
-      status: 502,
-      message: /** @type {Error} */ (cause).message,
-      cause,
-      fatal: true,
-    });
+    throw apiError(cause);
   }
 
   if (page.kind === 'redirect') {

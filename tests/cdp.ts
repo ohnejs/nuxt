@@ -91,12 +91,14 @@ export async function openBrowser() {
     evaluate,
     until,
     goto: (url: string) => send('Page.navigate', { url }),
-    async frame(origin: string) {
-      for (;;) {
+    async frame(origin: string, timeout = 8000) {
+      const end = Date.now() + timeout;
+      while (Date.now() < end) {
         for (const [id, context] of contexts)
           if (context.origin === origin && context.isDefault) return id;
         await sleep(50);
       }
+      throw new Error(`No frame shows ${origin}`);
     },
     async close() {
       socket.close();

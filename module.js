@@ -6,6 +6,7 @@ import {
   addPlugin,
   addRouteMiddleware,
   addServerHandler,
+  addServerPlugin,
   addTemplate,
   addTypeTemplate,
   createResolver,
@@ -13,14 +14,26 @@ import {
 } from 'nuxt/kit';
 
 const BLOCK = /^Blocks(?=[A-Z])/;
+const TOKEN = /^[!#$%&'*+.^_`|~0-9a-z-]+$/;
+const UNRELAYED =
+  /^(?:authorization|cookie|host|ohne-preview|origin|proxy-authorization|x-forwarded-.*)$/;
 
 export default defineNuxtModule({
   meta: { name: '@ohnejs/nuxt', configKey: 'ohne', compatibility: { nuxt: '>=4.5.0' } },
-  defaults: { api: '', types: 'ohne.ts' },
+  defaults: { api: '', types: 'ohne.ts', sandbox: '', headers: /** @type {string[]} */ ([]) },
   setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url);
+    const headers = options.headers.map((name) => name.toLowerCase());
+    const refused = headers.find((name) => !TOKEN.test(name) || UNRELAYED.test(name));
+    if (refused !== undefined) {
+      throw new Error(
+        `\`ohne.headers\` cannot pass \`${refused}\` to the API. Name the headers your API's middleware reads, like \`'recaptcha-token'\`.`,
+      );
+    }
     nuxt.options.runtimeConfig.ohne = {
       api: options.api,
+      sandbox: options.sandbox,
+      headers,
       .../** @type {object} */ (nuxt.options.runtimeConfig.ohne),
     };
     // Vite would discover the client on the first page in dev, then reload the page.
@@ -28,7 +41,10 @@ export default defineNuxtModule({
 
     const composables = resolve('runtime/composables.js');
     addImports(
-      ['useOhne', 'useOhnePage', 'useOhneToken'].map((name) => ({ name, from: composables })),
+      ['useOhne', 'useOhnePage', 'useOhneToken', 'useOhneRead', 'useOhneList'].map((name) => ({
+        name,
+        from: composables,
+      })),
     );
     addRouteMiddleware({ name: 'ohne', path: resolve('runtime/middleware.js') });
     addPlugin(resolve('runtime/plugin.js'));
@@ -40,6 +56,11 @@ export default defineNuxtModule({
     for (const route of ['/_ohne/**', '/sitemap.xml', '/robots.txt']) {
       addServerHandler({ route, handler });
     }
+    addServerPlugin(resolve('runtime/nitro.js'));
+    nuxt.hook('nitro:config', (config) => {
+      const nitro = /** @type {{ errorHandler?: string | string[] }} */ (config);
+      nitro.errorHandler = [resolve('runtime/error.js'), ...[nitro.errorHandler ?? []].flat()];
+    });
 
     const blocks = new Set();
     nuxt.hook('components:extend', (list) => {

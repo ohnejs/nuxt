@@ -32,7 +32,7 @@
     "typecheck": "tsc && pnpm --dir tests/fixture exec nuxt typecheck && pnpm --dir tests/fixture exec vue-tsc -b tsconfig.runtime.json && pnpm --dir tests/floor exec nuxt typecheck"
   },
   "devDependencies": {
-    "@ohnejs/client": "0.2.0",
+    "@ohnejs/client": "0.3.0",
     "@ohnejs/cms": "0.3.1",
     "@types/node": "26.0.0",
     "nuxt": "4.6.2",
@@ -42,7 +42,7 @@
     "vue": "3.5.44"
   },
   "peerDependencies": {
-    "@ohnejs/client": ">=0.2.0 <0.3.0-0",
+    "@ohnejs/client": ">=0.3.0 <0.4.0-0",
     "nuxt": ">=4.5.0 <5.0.0-0",
     "vue": ">=3.5.39 <4.0.0-0"
   },

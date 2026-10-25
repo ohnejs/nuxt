@@ -2,7 +2,7 @@
 /** @import { RegisteredCMS } from '../module.js' */
 /** @import { RouteLocationNormalized, Router } from '#vue-router' */
 
-import { useState } from '#imports';
+import { createError, useRuntimeConfig, useState } from '#imports';
 
 /**
  * A page the `ohne` middleware resolved: anything but a redirect, which it answers itself.
@@ -17,6 +17,38 @@ export const PROXY = '/_ohne';
 
 /** @type {string | undefined} */
 let replaced;
+
+/**
+ * Whether the server relays a sandbox cookie, which keeps every page out of search engines.
+ * The payload carries it, since the browser never sees the server's config.
+ *
+ * @example
+ * ```ts
+ * useSandbox().value // -> true while `ohne.sandbox` names a cookie
+ * ```
+ */
+export function useSandbox() {
+  return useState('ohne:sandbox', () => Boolean(useRuntimeConfig().ohne?.sandbox));
+}
+
+/**
+ * The `502` a failed read of the API shows, as Nuxt's error page.
+ *
+ * @example
+ * ```ts
+ * apiError(new Error('ohne answered 500 for /cms/records/Settings')) // -> NuxtError, status 502
+ * ```
+ *
+ * @param {unknown} cause
+ */
+export function apiError(cause) {
+  return createError({
+    status: 502,
+    message: /** @type {Error} */ (cause).message,
+    cause,
+    fatal: true,
+  });
+}
 
 /**
  * Each resolved page by the address it answers, as the `ohne` middleware writes it.
