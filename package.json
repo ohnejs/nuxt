@@ -1,6 +1,6 @@
 {
   "name": "@ohnejs/nuxt",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Renders the pages of an ohne CMS in Nuxt: redirects, 404s, the head and the live preview.",
   "homepage": "https://ohne.dev/docs/cms/frameworks#nuxt",
   "license": "MIT",
