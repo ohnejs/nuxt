@@ -5,6 +5,7 @@ import { after, test } from 'node:test';
 import { promisify } from 'node:util';
 
 const run = promisify(execFile);
+const env = { ...process.env, NO_COLOR: '1' };
 const fixture = new URL('fixture/', import.meta.url).pathname;
 const dir = new URL('.stale/', import.meta.url).pathname;
 const nuxt = `${fixture}node_modules/.bin/nuxt`;
@@ -25,7 +26,7 @@ test('`nuxt typecheck` names a types file from another client and a block withou
     .replace('export interface Blocks {', 'export interface Blocks {\n  Gallery: {};');
   writeFileSync(`${dir}ohne.ts`, types);
   await run(nuxt, ['prepare'], { cwd: dir });
-  const failure = await run(nuxt, ['typecheck'], { cwd: dir }).then(
+  const failure = await run(nuxt, ['typecheck'], { cwd: dir, env }).then(
     () => assert.fail('`nuxt typecheck` passed'),
     (error: { stdout: string; stderr: string }) => error.stdout + error.stderr,
   );

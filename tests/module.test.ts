@@ -5,6 +5,7 @@ import { after, test } from 'node:test';
 import { promisify } from 'node:util';
 
 const run = promisify(execFile);
+const env = { ...process.env, NO_COLOR: '1' };
 const fixture = new URL('fixture/', import.meta.url).pathname;
 const dir = new URL('.headers/', import.meta.url).pathname;
 const nuxt = `${fixture}node_modules/.bin/nuxt`;
@@ -21,7 +22,7 @@ test('the module refuses to pass a credential or a malformed name in `ohne.heade
       `${dir}nuxt.config.ts`,
       `export default defineNuxtConfig({ extends: ['../fixture'], ohne: { headers: [${JSON.stringify(name)}] } });\n`,
     );
-    const failure = await run(nuxt, ['prepare'], { cwd: dir }).then(
+    const failure = await run(nuxt, ['prepare'], { cwd: dir, env }).then(
       () => assert.fail(`\`nuxt prepare\` passed with ${name}`),
       (error: { stdout: string; stderr: string }) => error.stdout + error.stderr,
     );
