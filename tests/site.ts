@@ -203,7 +203,9 @@ export function suite(app: string) {
   test('a miss without a `404` record is a `404` error, resolving once', async () => {
     const { response, html, hits } = await get('/gone');
     assert.equal(response.status, 404);
+    assert.equal(response.statusText, 'Page Not Found');
     assert.match(html, /error:404/);
+    assert.match(html, /<p class="message">Page Not Found<\/p>/);
     assert.match(html, /layout:notFound/);
     assert.deepEqual(hits, ['/gone']);
   });

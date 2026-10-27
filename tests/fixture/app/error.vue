@@ -7,5 +7,6 @@ defineProps<{ error: NuxtError }>();
 <template>
   <NuxtLayout>
     <p class="error">error:{{ error.statusCode }}</p>
+    <p class="message">{{ error.message }}</p>
   </NuxtLayout>
 </template>

@@ -63,6 +63,13 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   pages.value[address] = page;
   if (page.kind === 'page') return;
   // Returned, not thrown, the server renders the error page without logging a missing page as a failure.
-  if (!page.page) return createError({ status: 404, data: page, fatal: import.meta.client });
+  if (!page.page) {
+    return createError({
+      status: 404,
+      statusText: 'Page Not Found',
+      data: page,
+      fatal: import.meta.client,
+    });
+  }
   if (event) setResponseStatus(event, 404);
 });
