@@ -76,7 +76,7 @@ export function suite(app: string) {
       const html = request.url?.startsWith('/demo')
         ? demo(request.url.includes('named'))
         : `<!doctype html>
-<iframe src="${origin}/about?ohne-preview=tok" width="800" height="600"></iframe>
+<iframe src="${origin}/about?tags=[a%2Cb]&ohne-preview=tok" width="800" height="600"></iframe>
 <script>
   window.received = [];
   addEventListener('message', (event) => event.data?.ohne === 1 && received.push(event.data.type));
@@ -812,7 +812,7 @@ export function suite(app: string) {
     await browser.until(`${text('h1')} === 'Draft title'`, frame);
     assert.equal(await browser.evaluate(text('[data-ohne-block="draft"]'), frame), 'Draft title');
     assert.equal(await browser.evaluate(text('header'), frame), 'layout:en:/about');
-    assert.equal(await browser.evaluate('location.search', frame), '');
+    assert.equal(await browser.evaluate('location.search', frame), '?tags=[a%2Cb]');
   });
 
   test('a change to the edited record never lands on another page in the frame', async () => {
