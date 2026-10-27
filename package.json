@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@ohnejs/client": "0.3.0",
-    "@ohnejs/cms": "0.4.0",
+    "@ohnejs/cms": "0.4.1",
     "@types/node": "26.0.0",
     "nuxt": "4.6.2",
     "oxfmt": "0.55.0",
