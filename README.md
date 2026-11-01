@@ -233,6 +233,46 @@ The token stays for the whole visit, even after the editor's script drops it fro
 
 The site serves `/sitemap.xml` and `/robots.txt` from the cms. A `robots.txt` in `public/` wins, so delete the one Nuxt's starter ships, or keep your own there.
 
+## Without the CMS
+
+A site that only calls your API's own routes, like a customer account, needs no CMS. The browser then calls your API under a path on your site, so give the API one with [`api.basePath`](https://ohne.dev/docs/project/config#the-api-server), like `'/api'`. Turn the CMS off, and name your API with that path:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['@ohnejs/nuxt'],
+  ohne: { api: 'http://localhost:9001/api', cms: false },
+});
+```
+
+Then `useOhneAPI()` calls any route by its id:
+
+```vue
+<!-- app/pages/account.vue -->
+<script setup lang="ts">
+const api = useOhneAPI();
+const { data: user } = await useAsyncData('user', () => api.user());
+const { data: posts } = await useAsyncData('posts', () =>
+  api.call('GET /posts', { query: { tag: 'news' } }),
+);
+</script>
+
+<template>
+  <main>
+    <p v-if="user">Signed in as {{ user.email }}</p>
+    <p v-for="post in posts" :key="post.title">{{ post.title }}</p>
+  </main>
+</template>
+```
+
+- On the server, a call carries the visitor's cookie and language, so it answers for the visitor's session.
+- In the browser, a call goes to `/api` on your site. `nuxt dev` serves it there. In production, route `/api` on your site's host to your API, so the session cookie belongs to your site and no CORS is needed.
+- `NUXT_OHNE_API` must keep the path, since the browser's calls use it.
+- `api.login({ email, password })` signs the visitor in and resolves how it went, like `{ kind: 'invalid' }`. Call it in the browser, where the API sets the session cookie.
+- A failed call throws an `APIError`. Under `useAsyncData` it arrives as a `NuxtError`, so read its `statusCode` and `data` there.
+
+To type every call, have your backend write its routes into `ohne.ts`, as [Typing your routes](https://ohne.dev/docs/project/monorepo#typing-your-routes) shows. Without the file, every call answers `unknown`.
+
 ## Production
 
 Set `NUXT_OHNE_API` on the server, and it replaces `ohne.api` when the server starts. One build then serves every environment:
@@ -247,6 +287,6 @@ When that address is private, set `API_URL` on the cms to the API's public URL. 
 
 `nuxt typecheck` runs `vue-tsc`, which needs TypeScript 6. Install both with `pnpm add -D typescript@6 vue-tsc`, and keep `typescript` at 6 in your Nuxt app, even if the rest of your workspace uses 7.
 
-A types file from another version of `@ohnejs/client` leaves your pages untyped. `nuxt typecheck` names it, like `` `ohne.ts` was written for another version of `@ohnejs/client` ``. Have the cms that matches your client write it again.
+A types file from another version of `@ohnejs/client` leaves your pages or calls untyped. `nuxt typecheck` names it, like `` `ohne.ts` was written for another version of `@ohnejs/client` ``. Have the backend that matches your client write it again.
 
 The full guide lives at [ohne.dev/docs/cms/frameworks](https://ohne.dev/docs/cms/frameworks#nuxt).

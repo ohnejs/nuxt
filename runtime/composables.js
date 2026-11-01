@@ -1,7 +1,7 @@
 /** @import { ListOptions, ReadOptions } from '@ohnejs/client' */
 /** @import { MaybeRefOrGetter } from 'vue' */
 
-import { createOhne } from '@ohnejs/client';
+import { createAPI, createOhne } from '@ohnejs/client';
 
 import {
   computed,
@@ -11,12 +11,14 @@ import {
   useNuxtApp,
   useRequestHeader,
   useRequestURL,
+  useResponseHeader,
   useRoute,
   useRuntimeConfig,
   useState,
   watch,
 } from '#imports';
 
+import { apiPath } from './api.js';
 import { addressOf, apiError, PROXY, usePages } from './pages.js';
 import { sandboxCookie } from './sandbox.js';
 
@@ -27,6 +29,27 @@ export function useOhne() {
     throw new Error('Set `ohne.api` in `nuxt.config.ts`, or `NUXT_OHNE_API`, to your ohne API');
   const cookie = sandboxCookie(sandbox, useRequestHeader('cookie'));
   return createOhne(cookie ? { api, fetchInit: { headers: { cookie } } } : { api });
+}
+
+export function useOhneAPI() {
+  const { path } = /** @type {{ path: string }} */ (useRuntimeConfig().public.ohne);
+  if (import.meta.client) return createAPI({ api: path });
+  const { api, sandbox } = useRuntimeConfig().ohne;
+  if (apiPath(api) !== path) {
+    throw new Error(
+      `Set \`NUXT_OHNE_API\` to an address with the path \`${path}\`, which the browser calls`,
+    );
+  }
+  /** @type {Record<string, string>} */
+  const headers = {};
+  for (const name of ['cookie', 'accept-language']) {
+    const value = useRequestHeader(name);
+    if (value) headers[name] = value;
+  }
+  if (sandboxCookie(sandbox, headers.cookie)) {
+    useResponseHeader('cache-control').value = 'private, no-store';
+  }
+  return createAPI({ api, fetchInit: { headers } });
 }
 
 export function useOhnePage() {

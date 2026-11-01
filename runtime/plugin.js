@@ -35,12 +35,7 @@ export default defineNuxtPlugin({
 
     if (import.meta.server) {
       const bound = sandboxCookie(useRuntimeConfig().ohne.sandbox, useRequestHeader('cookie'));
-      const headers =
-        token.value || bound
-          ? useOhne().previewHeaders()
-          : sandbox.value
-            ? { 'x-robots-tag': 'noindex' }
-            : {};
+      const headers = token.value || bound ? useOhne().previewHeaders() : {};
       for (const [name, value] of Object.entries(headers)) {
         useResponseHeader(name).value = value;
       }

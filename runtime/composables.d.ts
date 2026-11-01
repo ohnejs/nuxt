@@ -1,4 +1,5 @@
 import type {
+  API,
   CollectionOf,
   ListOptions,
   Ohne,
@@ -12,7 +13,7 @@ import type {
 } from '@ohnejs/client';
 import type { ComputedRef, MaybeRefOrGetter, Ref } from 'vue';
 
-import type { RegisteredCMS } from '../module.js';
+import type { RegisteredCMS, RegisteredRoutes } from '../module.js';
 
 /**
  * The client of your ohne API, as `createOhne` makes it.
@@ -24,6 +25,18 @@ import type { RegisteredCMS } from '../module.js';
  * ```
  */
 export function useOhne(): Ohne<RegisteredCMS>;
+
+/**
+ * The client of your API's own routes for this request.
+ * On the server it calls `api` with the visitor's `cookie` and `accept-language`.
+ * In the browser it calls `api`'s path on the site.
+ *
+ * @example
+ * ```ts
+ * const sites = await useOhneAPI().call('GET /portal/sites', { query: { client } })
+ * ```
+ */
+export function useOhneAPI(): API<RegisteredRoutes>;
 
 /**
  * The page the `ohne` middleware resolved for the current path, or `undefined` before it ran.

@@ -1,4 +1,6 @@
-import { defineNitroPlugin, useRuntimeConfig } from '#imports';
+/** @import { NitroApp } from 'nitropack/types' */
+
+import { defineNitroPlugin, setResponseHeader, useRuntimeConfig } from '#imports';
 
 const CACHING = ['cache', 'swr', 'isr', 'prerender'];
 
@@ -6,7 +8,7 @@ const CACHING = ['cache', 'swr', 'isr', 'prerender'];
  * Guards a server that relays a sandbox cookie: it refuses a cached route, and says once it is a demo.
  * A cached page would serve one visitor's sandbox copy to the next.
  */
-export default defineNitroPlugin(() => {
+export default defineNitroPlugin((/** @type {NitroApp} */ nitroApp) => {
   const { ohne, nitro } = useRuntimeConfig();
   if (!ohne.sandbox) return;
   /** @type {Record<string, Record<string, unknown>>} */
@@ -19,6 +21,7 @@ export default defineNitroPlugin(() => {
       `\`ohne.sandbox\` gives each visitor their own copy, which a cached route would share: ${cached.map((route) => `\`${route}\``).join(', ')}. Drop \`cache\`, \`swr\`, \`isr\` and \`prerender\` from its route rules, or unset \`ohne.sandbox\`.`,
     );
   }
+  nitroApp.hooks.hook('request', (event) => setResponseHeader(event, 'x-robots-tag', 'noindex'));
   console.warn(
     `[@ohnejs/nuxt] \`ohne.sandbox\` relays the \`${ohne.sandbox}\` cookie to the API and marks every page \`noindex\`. Never set it on a real site.`,
   );

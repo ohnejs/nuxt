@@ -1,4 +1,4 @@
-import type { Schema, UntypedSchema } from '@ohnejs/client';
+import type { RouteMap, Schema, UntypedRoutes, UntypedSchema } from '@ohnejs/client';
 import type { NuxtModule } from 'nuxt/schema';
 
 /**
@@ -6,16 +6,18 @@ import type { NuxtModule } from 'nuxt/schema';
  */
 export interface ModuleOptions {
   /**
-   * The origin of your ohne API, like `'https://api.example.com'`.
+   * The address of your ohne API, like `'https://api.example.com'`.
+   * With `cms: false` it ends in the API's `api.basePath`, like `'https://api.example.com/api'`.
    * Only the server reads it, so it may be an address on a private network.
-   * The browser reads through the site's own `/_ohne` routes instead.
+   * The browser calls the site instead: its `/_ohne` routes, or with `cms: false` that path.
    * `NUXT_OHNE_API` replaces it when the server starts.
    */
   api: string;
 
   /**
-   * The types file the cms writes, relative to the Nuxt root.
-   * Its `CMS` types every page; while the file is missing, pages read untyped.
+   * The types file your backend writes, relative to the Nuxt root.
+   * Its `CMS` types every page, or with `cms: false` its `Routes` types every call.
+   * While the file is missing, both read untyped.
    *
    * @default
    * 'ohne.ts'
@@ -44,10 +46,20 @@ export interface ModuleOptions {
    * []
    */
   headers?: string[];
+
+  /**
+   * Whether the site renders pages from an ohne CMS.
+   * `false` drops the CMS composables, the components, the page middleware and the head plugin.
+   * It drops `/_ohne`, `/sitemap.xml`, `/robots.txt` and the error page handler too, and adds `useOhneAPI`.
+   *
+   * @default
+   * true
+   */
+  cms?: boolean;
 }
 
 /**
- * Holds your `CMS` under `cms`.
+ * Holds your `CMS` under `cms`, or your `Routes` under `routes`.
  * The module fills it from your types file, so you never write it.
  */
 export interface Register {}
@@ -57,6 +69,13 @@ export interface Register {}
  * A types file from another version of `@ohnejs/client` reads untyped too, and `nuxt typecheck` names it.
  */
 export type RegisteredCMS = Register extends { cms: infer S extends Schema } ? S : UntypedSchema;
+
+/**
+ * Your `Routes`, or `UntypedRoutes` while there is no types file.
+ */
+export type RegisteredRoutes = Register extends { routes: infer R extends RouteMap }
+  ? R
+  : UntypedRoutes;
 
 /**
  * Renders the pages of an ohne CMS: it resolves each path, fills the `<head>`, and joins the live preview.
