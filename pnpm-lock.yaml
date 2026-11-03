@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@ohnejs/client':
-        specifier: 0.3.0
-        version: 0.3.0
+        specifier: 0.4.0
+        version: 0.4.0
       '@ohnejs/cms':
         specifier: 0.5.0
         version: 0.5.0(ohnejs@0.5.0)
@@ -670,8 +670,8 @@ packages:
       nuxt: ^4.6.2
       vite: ^8.3.4
 
-  '@ohnejs/client@0.3.0':
-    resolution: {integrity: sha512-f9xKnDVbw/9OvH7e0Iizfy1zpnNDiBxypSpRHJ6/XENi7yhVFDYe93FsgS54u4kJ7KGV7eH/kZ8LqPo5DQDcSQ==}
+  '@ohnejs/client@0.4.0':
+    resolution: {integrity: sha512-4vgN1PAKpk3nps+uVuRfPvfYg95x4Mq7rQZG/DTHqcWNPjvDB6OBo1Lg8BDfLenjY66csMxGug2Gh+vxPynnRA==}
     engines: {node: '>=20.0.0'}
 
   '@ohnejs/cms@0.5.0':
@@ -5234,7 +5234,7 @@ snapshots:
       - rolldown
       - unplugin
 
-  '@ohnejs/client@0.3.0': {}
+  '@ohnejs/client@0.4.0': {}
 
   '@ohnejs/cms@0.5.0(ohnejs@0.5.0)':
     dependencies:
