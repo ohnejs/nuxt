@@ -22,15 +22,16 @@ test(
   async () => {
     api = await startAPI('');
     const port = await freePort();
-    dev = spawn(nuxt, ['dev', '--port', String(port), '--host', '127.0.0.1'], {
+    dev = spawn(nuxt, ['dev', '--port', String(port)], {
       cwd: dir,
       env: { ...process.env, NUXT_OHNE_API: api.origin },
       stdio: 'ignore',
     });
     let html = '';
     while (!html.includes('data-ohne-block')) {
+      assert.equal(dev.exitCode, null, '`nuxt dev` exited before it rendered the page');
       await sleep(500);
-      html = await fetch(`http://127.0.0.1:${port}/about`).then(
+      html = await fetch(`http://localhost:${port}/about`).then(
         (response) => response.text(),
         () => '',
       );
